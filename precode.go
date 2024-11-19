@@ -40,7 +40,6 @@ var tasks = map[string]Task{
 	},
 }
 
-// Получить все задачи
 func getAllTasks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -54,7 +53,6 @@ func getAllTasks(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-// Получить задачу по ID
 func getTaskByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
@@ -75,34 +73,28 @@ func getTaskByID(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-// Создать задачу
 func createTask(w http.ResponseWriter, r *http.Request) {
 	var task Task
 	var buf bytes.Buffer
 
-	// Чтение тела запроса
 	_, err := buf.ReadFrom(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Декодирование JSON в структуру Task
 	if err = json.Unmarshal(buf.Bytes(), &task); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Проверка наличия ID у задачи
 	if task.ID == "" {
 		http.Error(w, "ID задачи обязателен", http.StatusBadRequest)
 		return
 	}
 
-	// Сохранение задачи
 	tasks[task.ID] = task
 
-	// Отправка ответа с созданной задачей
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	resp, err := json.Marshal(task)
